@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Module containing the Slack logging handler.
-"""
+"""Module containing the Slack logging handler."""
 
 __author__ = "Matt Pryor"
 __copyright__ = "Copyright 2015 UK Science and Technology Facilities Council"
@@ -14,7 +12,7 @@ import requests
 
 class SlackHandler(logging.Handler):
     def __init__(self, webhook_url, channel=None, username=None, level=logging.NOTSET):
-        super(SlackHandler, self).__init__(level)
+        super().__init__(level=level)
         self._webhook_url = webhook_url
         self._channel = channel
         # If no username was given, use the hostname
@@ -47,6 +45,6 @@ class SlackHandler(logging.Handler):
                     },
                 ]
             # Send the request
-            requests.post(self._webhook_url, json=content)
-        except:
+            requests.post(self._webhook_url, json=content, timeout=10)
+        except Exception:
             self.handleError(record)
