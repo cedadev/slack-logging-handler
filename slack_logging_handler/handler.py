@@ -6,12 +6,14 @@ Module containing the Slack logging handler.
 __author__ = "Matt Pryor"
 __copyright__ = "Copyright 2015 UK Science and Technology Facilities Council"
 
-import os, logging
+import logging
+import os
+
 import requests
 
 
 class SlackHandler(logging.Handler):
-    def __init__(self, webhook_url, channel = None, username = None, level = logging.NOTSET):
+    def __init__(self, webhook_url, channel=None, username=None, level=logging.NOTSET):
         super(SlackHandler, self).__init__(level)
         self._webhook_url = webhook_url
         self._channel = channel
@@ -20,31 +22,31 @@ class SlackHandler(logging.Handler):
 
     def emit(self, record):
         try:
-            # We want to add any exception info as an attachment rather than as part
-            # of the log message
-            # So we temporarily remove it from the record while we get the message
+            # We want to add any exception info as an attachment rather than as part
+            # of the log message
+            # So we temporarily remove it from the record while we get the message
             exc_info, exc_text = record.exc_info, record.exc_text
             record.exc_info = record.exc_text = None
-            content = { 'text' : self.format(record) }
+            content = {"text": self.format(record)}
             record.exc_info, record.exc_text = exc_info, exc_text
-            # Set username and channel
-            content['username'] = self._username
+            # Set username and channel
+            content["username"] = self._username
             if self._channel:
-                content['channel'] = self._channel
-            # If there is exception information, attach it
+                content["channel"] = self._channel
+            # If there is exception information, attach it
             if record.exc_info:
                 formatter = self.formatter or logging.Formatter()
-                # Wrap the traceback so it is formatted
-                exc_text = '```' + formatter.formatException(record.exc_info) + '```'
-                content['attachments'] = [
+                # Wrap the traceback so it is formatted
+                exc_text = "```" + formatter.formatException(record.exc_info) + "```"
+                content["attachments"] = [
                     {
-                        'color' : 'danger',
-                        'mrkdwn_in' : ['text'],
-                        'title' : 'Exception traceback',
-                        'text' : exc_text,
+                        "color": "danger",
+                        "mrkdwn_in": ["text"],
+                        "title": "Exception traceback",
+                        "text": exc_text,
                     },
                 ]
-            # Send the request
-            requests.post(self._webhook_url, json = content)
+            # Send the request
+            requests.post(self._webhook_url, json=content)
         except:
             self.handleError(record)
